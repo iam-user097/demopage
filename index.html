@@ -20,7 +20,6 @@
       min-height: 100vh;
     }
 
-    /* Header */
     header {
       background: #fff;
       display: flex;
@@ -60,7 +59,6 @@
       transform: scale(1.05);
     }
 
-    /* Search */
     .search-bar {
       margin: 20px auto;
       max-width: 600px;
@@ -91,7 +89,6 @@
       background: #b8001c;
     }
 
-    /* Categories */
     .categories {
       padding: 30px;
       display: grid;
@@ -126,7 +123,6 @@
       box-shadow: 0 8px 15px rgb(0, 0, 7);
     }
 
-    /* Products Section */
     .products-section {
       padding: 30px;
     }
@@ -170,7 +166,8 @@
     }
 
     .product-card .edit-btn,
-    .product-card .delete-btn {
+    .product-card .delete-btn,
+    .product-card .order-btn {
       margin: 5px 4px 0 4px;
       padding: 6px 14px;
       border-radius: 16px;
@@ -193,12 +190,18 @@
     .product-card .delete-btn:hover {
       background: #b8001c;
     }
+    .product-card .order-btn {
+      background: #00b894;
+      color: #fff;
+    }
+    .product-card .order-btn:hover {
+      background: #00916e;
+    }
 
     .product-card:hover {
       transform: translateY(-6px);
     }
 
-    /* Footer */
     footer {
       background: #222;
       color: #fff;
@@ -264,12 +267,10 @@
       }
     }
 
-    // Check if admin is logged in (simple flag for demo)
     function isAdmin() {
       return localStorage.getItem("isAdmin") === "true";
     }
 
-    // Show/hide Add Product and Logout buttons for admin
     document.addEventListener("DOMContentLoaded", function() {
       if (isAdmin()) {
         document.getElementById("addProductBtn").style.display = "inline-block";
@@ -279,7 +280,6 @@
         document.getElementById("logoutBtn").style.display = "none";
       }
 
-      // Add click event to each category card
       document.querySelectorAll('.category-card').forEach(card => {
         card.addEventListener('click', function() {
           const category = this.getAttribute('data-category');
@@ -289,6 +289,7 @@
       });
 
       loadProducts();
+      renderOrderRequests();
     });
 
     function logoutAdmin() {
@@ -296,16 +297,14 @@
       window.location.reload();
     }
 
-    // Load products from localStorage and render
     function loadProducts(searchQuery = "", categoryFilter = "") {
       const products = JSON.parse(localStorage.getItem("products")) || [];
       const container = document.getElementById("products-container");
       container.innerHTML = "";
 
-      // Filter products based on search query and category
       const filtered = products.filter(p => {
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery) ||
-                              p.category.toLowerCase().includes(searchQuery);
+        const matchesSearch = p.name && p.name.toLowerCase().includes(searchQuery) ||
+                              p.category && p.category.toLowerCase().includes(searchQuery);
         const matchesCategory = categoryFilter ? p.category === categoryFilter : true;
         return matchesSearch && matchesCategory;
       });
@@ -315,14 +314,12 @@
         return;
       }
 
-      // Group filtered products by category
       const grouped = {};
       filtered.forEach(p => {
         if (!grouped[p.category]) grouped[p.category] = [];
         grouped[p.category].push(p);
       });
 
-      // Render categories with products
       for (let category in grouped) {
         let section = document.createElement("section");
         section.classList.add("products-section");
@@ -335,10 +332,12 @@
                 <h4>${prod.name}</h4>
                 <p>Price: ₹${prod.totalPrice !== undefined ? prod.totalPrice : ''}</p>
                 <p><small>Discount: ${prod.discount !== undefined ? prod.discount : 0}%</small></p>
-                ${isAdmin() ? `
-                  <button class="edit-btn" onclick="editProduct('${prod.id}')">Edit</button>
-                  <button class="delete-btn" onclick="deleteProduct('${prod.id}')">Delete</button>
-                ` : ""}
+                ${
+                  isAdmin()
+                  ? `<button class="edit-btn" onclick="editProduct('${prod.id}')">Edit</button>
+                     <button class="delete-btn" onclick="deleteProduct('${prod.id}')">Delete</button>`
+                  : `<button class="order-btn" onclick="orderProduct('${prod.id}')">Order</button>`
+                }
               </div>
             `).join("")}
           </div>
@@ -348,13 +347,11 @@
       }
     }
 
-    // Search function
     function searchProducts() {
       const query = document.getElementById("searchInput").value.toLowerCase().trim();
       loadProducts(query);
     }
 
-    // Delete product (admin only)
     function deleteProduct(id) {
       if (!isAdmin()) return;
       if (!confirm("Are you sure you want to delete this product?")) return;
@@ -362,16 +359,15 @@
       products = products.filter(p => p.id !== id);
       localStorage.setItem("products", JSON.stringify(products));
       loadProducts();
+      renderOrderRequests();
     }
 
-    // Edit product (admin only)
     function editProduct(id) {
       if (!isAdmin()) return;
       let products = JSON.parse(localStorage.getItem("products")) || [];
       const prod = products.find(p => p.id === id);
       if (!prod) return;
 
-      // Simple prompt-based editing for demo
       const name = prompt("Edit Product Name:", prod.name);
       if (name === null) return;
       const price = prompt("Edit Price:", prod.totalPrice);
@@ -385,12 +381,86 @@
 
       localStorage.setItem("products", JSON.stringify(products));
       loadProducts();
+      renderOrderRequests();
     }
 
-    // For demo: set admin flag if coming from admin login
-    if (window.location.search.includes("admin=1")) {
-      localStorage.setItem("isAdmin", "true");
+    function orderProduct(id) {
+      if (isAdmin()) return;
+      let products = JSON.parse(localStorage.getItem("products")) || [];
+      const prod = products.find(p => p.id === id);
+      if (!prod) return;
+
+      let contact = prompt("Enter your Contact Number:");
+      if (!contact || !/^\d{10,}$/.test(contact.trim())) {
+        alert("Please enter a valid contact number.");
+        return;
+      }
+      let address = prompt("Enter your Home Address:");
+      if (!address || address.trim().length < 5) {
+        alert("Please enter a valid address.");
+        return;
+      }
+
+      let orders = JSON.parse(localStorage.getItem("orderRequests")) || [];
+      orders.push({
+        productId: prod.id,
+        productName: prod.name,
+        price: prod.totalPrice,
+        discount: prod.discount,
+        contact: contact.trim(),
+        address: address.trim(),
+        date: new Date().toLocaleString()
+      });
+      localStorage.setItem("orderRequests", JSON.stringify(orders));
+      alert("Order placed! Your request has been sent to admin.");
     }
-</script>
-</body>
-</html>
+
+    // Admin: Render order requests with Accept button
+    function renderOrderRequests() {
+      if (!isAdmin()) return;
+      let orders = JSON.parse(localStorage.getItem("orderRequests")) || [];
+      let products = JSON.parse(localStorage.getItem("products")) || [];
+      let oldSection = document.getElementById("order-requests-section");
+      if (oldSection) oldSection.remove();
+
+      if (orders.length === 0) return;
+
+      let section = document.createElement("section");
+      section.classList.add("products-section");
+      section.id = "order-requests-section";
+      section.innerHTML = `<h2>Order Requests</h2>
+        <div class="products-grid">
+          ${orders.map((order, idx) => {
+            let prod = products.find(p => p.id === order.productId);
+            let img = prod && prod.images && prod.images[0] ? prod.images[0] : '';
+            return `
+              <div class="product-card">
+                <img src="${img}" alt="${order.productName}">
+                <h4>${order.productName}</h4>
+                <p>Price: ₹${order.price}</p>
+                <p>Discount: ${order.discount}%</p>
+                <p><b>Contact:</b> ${order.contact}</p>
+                <p><b>Address:</b> ${order.address}</p>
+                <p><small>Ordered at: ${order.date}</small></p>
+                <button class="order-btn" onclick="acceptOrder(${idx})">Accept</button>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+      document.body.insertBefore(section, document.querySelector("footer"));
+    }
+
+    function acceptOrder(idx) {
+      if (!isAdmin()) return;
+      let orders = JSON.parse(localStorage.getItem("orderRequests")) || [];
+      if (orders[idx]) {
+        alert("Order accepted!");
+        orders.splice(idx, 1);
+        localStorage.setItem("orderRequests", JSON.stringify(orders));
+        renderOrderRequests();
+      }
+    }
+
+    if (window.location.search.includes("admin=1")) {
+      localStorage.setItem("isAdmin",
