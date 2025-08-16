@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #e60023, #ff4b5c);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .register-container {
+      background-color: transparent;
+      backdrop-filter: blur(20px);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      width: 320px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-30px);
+      animation: fadeSlideIn 1s ease-out forwards;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: white;
+      opacity: 0;
+      animation: fadeIn 1s ease-in forwards;
+      animation-delay: 0.3s;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    input:nth-of-type(1) { animation: fadeUp 0.8s forwards; animation-delay: 0.6s; }
+    input:nth-of-type(2) { animation: fadeUp 0.8s forwards; animation-delay: 0.9s; }
+    button { animation: fadeUp 0.8s forwards; animation-delay: 1.2s; }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    input {
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    input:hover {
+      border: 1px solid black;
+      box-shadow: 0 0 8px rgba(0,0,0,0.5);
+      background: transparent;
+      transform: scale(1.05);
+    }
+    button {
+      background: red;
+      border: 1px solid black;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background-color: greenyellow;
+      border: 2px solid black;
+      box-shadow: 0 0 8px rgba(0,0,0,0.5);
+      transform: scale(1.05);
+    }
+    p {
+      margin-top: 15px;
+      font-size: 14px;
+      color: white;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+      animation-delay: 1.5s;
+    }
+    a {
+      color: #fff;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    a:hover {
+      text-decoration: underline;
+      color: #000;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>Admin Register</h2>
+    <input type="text" id="regUsername" placeholder="Create Username" required>
+    <input type="password" id="regPassword" placeholder="Create Password" required>
+    <button onclick="register()">Register</button>
+    <p>Already have an account? <a href="admin.html">Login</a></p>
+  </div>
+  <script>
+    function register() {
+      const username = document.getElementById("regUsername").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+      if (!username || !password) {
+        alert("Please fill all fields!");
+        return;
+      }
+      localStorage.setItem("adminUsername", username);
+      localStorage.setItem("adminPassword", password);
+      alert("✅ Registration Successful! Please login.");
+      window.location.href = "admin.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Login - MarketX</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #ff9a9e, #fad0c4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+      width: 320px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #e60023;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    input {
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    input:hover {
+      border-color: #e60023;
+      background-color: transparent;
+      outline: none;
+      box-shadow: 0 0 6px rgba(255, 0, 38, 0.718);
+      transform: scale(1.05);
+    }
+    button {
+      background: rgb(52, 52, 214);
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: cyan;
+      color: black;
+      border: 2px solid black;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      transform: scale(1.05);
+    }
+    p {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    a {
+      color: #e60023;
+      font-weight: bold;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    a:hover {
+      color: #b8001c;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Customer Login</h2>
+    <input type="text" id="custUsername" placeholder="Enter Username">
+    <input type="password" id="custPassword" placeholder="Enter Password">
+    <button onclick="customerLogin()">Login</button>
+    <p>Don't have an account? <a href="customer-register.html">Register Here</a></p>
+  </div>
+
+  <script>
+    function customerLogin() {
+      const username = document.getElementById("custUsername").value;
+      const password = document.getElementById("custPassword").value;
+
+      const storedUsername = localStorage.getItem("custUsername");
+      const storedPassword = localStorage.getItem("custPassword");
+
+      if (username === storedUsername && password === storedPassword) {
+        alert("✅ Customer Login Successful!");
+        window.location.href = "index.html"; // redirect to home page
+      } else {
+        alert("❌ Invalid Username or Password!");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product (Admin)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #e60023, #ff4b5c);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      padding: 30px 30px 20px 30px;
+    }
+    h2 {
+      text-align: center;
+      color: #e60023;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin: 12px 0 5px 0;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 7px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #e60023;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #b8001c;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #e60023;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    .back-link:hover {
+      color: #b8001c;
+      text-decoration: underline;
+    }
+    .preview-img {
+      display: block;
+      margin: 10px auto 15px auto;
+      max-width: 180px;
+      max-height: 180px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      object-fit: contain;
+    }
+    .readonly {
+      background: #f5f5f5;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Add Product</h2>
+    <form id="productForm">
+      <label for="prodName">Product Name</label>
+      <input type="text" id="prodName" required>
+
+      <label for="prodCategory">Category</label>
+      <select id="prodCategory" required>
+        <option value="">Select Category</option>
+        <option>Power Tools</option>
+        <option>Electricals</option>
+        <option>Appliances & Utilities</option>
+        <option>Safety</option>
+        <option>Medical Supplies</option>
+        <option>Office Supplies</option>
+        <option>Gardening</option>
+        <option>Security</option>
+        <option>Plumbing & Fittings</option>
+      </select>
+
+      <label for="prodPrice">Price (₹)</label>
+      <input type="number" id="prodPrice" min="0" required>
+
+      <label for="prodDiscount">Discount (%)</label>
+      <input type="number" id="prodDiscount" min="0" max="100" value="0" required>
+
+      <label for="prodTotalPrice">Total Price (₹)</label>
+      <input type="number" id="prodTotalPrice" class="readonly" readonly required>
+
+      <label for="prodImage">Product Image</label>
+      <input type="file" id="prodImage" accept="image/*" required>
+      <img id="previewImg" class="preview-img" style="display:none;" />
+
+      <button type="submit">Add Product</button>
+    </form>
+    <a href="index.html" class="back-link">← Back to Home</a>
+  </div>
+  <script>
+    // Calculate total price
+    function updateTotalPrice() {
+      const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+      const discount = parseFloat(document.getElementById('prodDiscount').value) || 0;
+      const total = price - (price * discount / 100);
+      document.getElementById('prodTotalPrice').value = total.toFixed(2);
+    }
+
+    document.getElementById('prodPrice').addEventListener('input', updateTotalPrice);
+    document.getElementById('prodDiscount').addEventListener('input', updateTotalPrice);
+
+    // Show image preview
+    document.getElementById('prodImage').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('previewImg').src = evt.target.result;
+          document.getElementById('previewImg').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        document.getElementById('previewImg').style.display = 'none';
+      }
+    });
+
+    // Save product to localStorage
+    document.getElementById('productForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('prodName').value.trim();
+      const category = document.getElementById('prodCategory').value;
+      const price = parseFloat(document.getElementById('prodPrice').value);
+      const discount = parseFloat(document.getElementById('prodDiscount').value);
+      const totalPrice = parseFloat(document.getElementById('prodTotalPrice').value);
+      const imageInput = document.getElementById('prodImage');
+      const file = imageInput.files[0];
+
+      if (!file) {
+        alert("Please select an image.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const imageData = evt.target.result;
+        const product = {
+          id: Date.now().toString(),
+          name,
+          category,
+          price,
+          discount,
+          totalPrice,
+          images: [imageData]
+        };
+        let products = JSON.parse(localStorage.getItem("products")) || [];
+        products.push(product);
+        localStorage.setItem("products", JSON.stringify(products));
+        alert("✅ Product added successfully!");
+        document.getElementById('productForm').reset();
+        document.getElementById('previewImg').style.display = 'none';
+        document.getElementById('prodTotalPrice').value = '';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Initialize total price on page load
+    updateTotalPrice();
+  </script>
+</body>
+</html>
